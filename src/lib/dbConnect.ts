@@ -14,15 +14,21 @@ async function dbConnect():Promise<void>{
         return
     }
 
+    const mongoUrl = process.env.MONGODB_URL;
+
+    if(!mongoUrl){
+        throw new Error("MONGODB_URL is not configured")
+    }
+
     try {
-        const db=await mongoose.connect(process.env.MONGODB_URL || '',{})
+        const db=await mongoose.connect(mongoUrl,{})
         connection.isConnected=db.connections[0].readyState
 
         console.log("DB Connected to database successfully")
 
     } catch (error) {
         console.log("Database connection failed",error)
-        process.exit(1)
+        throw error
     }
 }
 

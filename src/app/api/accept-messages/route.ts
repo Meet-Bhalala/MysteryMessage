@@ -6,8 +6,6 @@ import {User} from "next-auth";
 import { success } from "zod";
 
 export async function POST(request: Request) {
-    await dbConnect();
-
     const session = await getServerSession(authOptions);
     const user:User= session?.user as User;
 
@@ -21,10 +19,12 @@ export async function POST(request: Request) {
         )
     }
     
-    const UserId=user._id
-    const {acceptMessages}=await request.json()
-
     try {
+        await dbConnect();
+
+        const UserId=user._id
+        const {acceptMessages}=await request.json()
+
         const updatedUser=await UserModel.findByIdAndUpdate(
             UserId,
             {
@@ -67,8 +67,6 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-    await dbConnect();
-
     const session = await getServerSession(authOptions);
     const user:User= session?.user as User;
 
@@ -82,9 +80,11 @@ export async function GET(request: Request) {
         )
     }
 
-    const UserId=user._id
-
     try {
+        await dbConnect();
+
+        const UserId=user._id
+
         const foundUser= await UserModel.findById(UserId)
     
         if(!foundUser)    {
@@ -101,7 +101,7 @@ export async function GET(request: Request) {
             {
                 success: true,
                 message: "Message acceptance status retrieved successfully",
-                isAccecptingMessages : foundUser.isAccecptingMessages,
+                isAcceptingMessages : foundUser.isAccecptingMessages,
             },
             { status: 200 }
         )

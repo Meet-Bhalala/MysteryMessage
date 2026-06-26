@@ -1,19 +1,19 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/options";
+import { authOptions } from "../../auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
 import { User } from "next-auth";
 import moongoose from "mongoose";
-import { success } from "zod";
 
-export async function GET(request: Request) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ messageId: string }> }) {
     try {
         await dbConnect();
 
+        const { messageId } = await params;
         const session = await getServerSession(authOptions);
-        const sessionUser:User = session?.user as User;
+        const user:User = session?.user as User;
 
-        if (!session||!sessionUser) {
+        if (!session||!user) {
             return Response.json(
                 {
                     success: false,
@@ -23,26 +23,19 @@ export async function GET(request: Request) {
             )
         }
 
-        const userId = new moongoose.Types.ObjectId(sessionUser._id);
+        const updateResult=await UserModel.updateOne({
+            _id: new moongoose.Types.ObjectId(user._id)
+        },{
+            $pull: {
+                messages:{_id:new moongoose.Types.ObjectId(messageId)}
+            }
+        })
 
-        const user=await UserModel.aggregate([
-            {
-                $match:{_id:userId}
-            },
-            {
-                $unwind:'$messages'
-            },
-            {$sort:{'messages.createdAt':-1}},
-            {$group:{_id:'$_id',messages:{$push:'$messages'}}}
-
-        ])
-
-        if(!user ||user.length===0)
-        {
+        if(updateResult.modifiedCount==0){
             return Response.json(
                 {
                     success: false,
-                    message: "No messages found for the user"
+                    message: "Message not found or you are not authorized to delete this message"
                 },
                 { status: 404 }
             )
@@ -51,23 +44,21 @@ export async function GET(request: Request) {
         return Response.json(
             {
                 success: true,
-                message: "Messages retrieved successfully",
-                messages: user[0].messages,
+                message: "Message deleted successfully"
             },
             { status: 200 }
         )
 
-
     } catch (error) {
-        console.log("Failed to retrieve messages", error);
+        console.log("Failed to delete message", error);
         return Response.json(
             {
                 success: false,
-                message: "Failed to retrieve messages"
+                message: "An error occurred while deleting the message"
             },
             { status: 500 }
         )
     }
-
+    
 
 }

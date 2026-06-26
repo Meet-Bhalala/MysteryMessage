@@ -7,9 +7,9 @@ import { success } from "zod";
 
 export async function POST(request:Request)
 {
-    await dbConnect();
-
     try {
+        await dbConnect();
+
         const { username, email, password } = await request.json();
         const existingUserVerifiedByUsername=await UserModel.findOne({
             username,

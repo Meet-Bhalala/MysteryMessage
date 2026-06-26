@@ -3,9 +3,9 @@ import UserModel from "@/model/User";
 
 
 export async function POST(request: Request) {
-    await dbConnect();
-    
     try {
+        await dbConnect();
+
         const { username, code } = await request.json();
         const decodedUsername=decodeURIComponent(username)
         const user=await UserModel.findOne({username:decodedUsername})
