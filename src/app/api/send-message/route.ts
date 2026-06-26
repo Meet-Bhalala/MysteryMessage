@@ -20,7 +20,7 @@ export async function POST(request: Request) {
             )
         }
 
-        if(!user.isAccecptingMessages){
+        if(user.isAccecptingMessages === false){
             return Response.json(
                 {
                     success: false,

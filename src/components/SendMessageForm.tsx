@@ -74,9 +74,13 @@ export default function SendMessageForm({ username }: SendMessageFormProps) {
                 toast.error(response.data.message || "Failed to send message");
             }
         } catch (error) {
-            console.error("Error sending message", error);
             const axiosError = error as AxiosError<ApiResponse>;
             const errorMessage = axiosError.response?.data?.message || "Failed to send message. Please try again.";
+
+            if (axiosError.response?.status !== 403) {
+                console.error("Error sending message", error);
+            }
+
             toast.error(errorMessage);
         } finally {
             setIsLoading(false);
@@ -183,7 +187,7 @@ export default function SendMessageForm({ username }: SendMessageFormProps) {
                                 onChange={handleTextareaChange}
                                 placeholder="Write your anonymous message here..."
                                 rows={5}
-                                className={`w-full min-h-[120px] p-4 rounded-xl border bg-neutral-50 text-neutral-800 placeholder-neutral-400 transition-all duration-200 outline-none resize-y text-base focus:bg-white focus:ring-4 ${
+                                className={`w-full min-h-30 p-4 rounded-xl border bg-neutral-50 text-neutral-800 placeholder-neutral-400 transition-all duration-200 outline-none resize-y text-base focus:bg-white focus:ring-4 ${
                                     isTooShort
                                         ? "border-amber-400 focus:border-amber-400 focus:ring-amber-100"
                                         : isTooLong
@@ -226,7 +230,7 @@ export default function SendMessageForm({ username }: SendMessageFormProps) {
                                 disabled={isLoading || !isLengthValid}
                                 className={`px-6 py-2.5 rounded-xl font-semibold shadow-md transition-all duration-200 flex items-center gap-2 cursor-pointer ${
                                     isLengthValid 
-                                        ? "bg-gradient-to-r from-neutral-800 to-neutral-950 text-white hover:from-neutral-700 hover:to-neutral-900 active:scale-95" 
+                                        ? "bg-linear-to-r from-neutral-800 to-neutral-950 text-white hover:from-neutral-700 hover:to-neutral-900 active:scale-95" 
                                         : "bg-neutral-200 text-neutral-400 border border-neutral-100 cursor-not-allowed"
                                 }`}
                             >
